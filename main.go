@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -29,8 +28,7 @@ func GetBlockHeighAndTime(blockHeigh int) (int, time.Time) {
 	}
 	response, err := http.Get(uri)
 	if err != nil {
-		fmt.Print(err.Error())
-		os.Exit(1)
+		log.Fatal(err)
 	}
 
 	responseData, err := ioutil.ReadAll(response.Body)
@@ -63,8 +61,7 @@ func GetAverageBlockTime(latestBlockHeigh int, latestBlockTime time.Time) float6
 	uri := "http://cosmos.delega.io:26657/blockchain?minHeight=" + strconv.Itoa(latestBlockHeigh-21) + "&maxHeight=" + strconv.Itoa(latestBlockHeigh-1)
 	response, err := http.Get(uri)
 	if err != nil {
-		fmt.Print(err.Error())
-		os.Exit(1)
+		log.Fatal(err)
 	}
 
 	responseData, err := ioutil.ReadAll(response.Body)
