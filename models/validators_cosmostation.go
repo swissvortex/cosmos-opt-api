@@ -10,6 +10,12 @@ func UnmarshalValidators(data []byte) (Validators, error) {
 	return r, err
 }
 
+func UnmarshalValidator(data []byte) (Validator, error) {
+	var r Validator
+	err := json.Unmarshal(data, &r)
+	return r, err
+}
+
 func (r *Validators) Marshal() ([]byte, error) {
 	return json.Marshal(r)
 }

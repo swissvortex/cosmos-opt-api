@@ -20,26 +20,22 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.GET("/blocktime", Blocktime)
-	e.GET("/validators/:id", ValidatorUptime)
+	e.GET("/validator/:id", ValidatorUptime)
 	e.Logger.Fatal(e.Start(":47567"))
 }
 
 func GetValidatorUptime(cosmosvaloper string) (models.Uptime, error) {
-	uri := "https://api.cosmostation.io/v1/staking/validators"
+	uri := "https://api.cosmostation.io/v1/staking/validator/" + cosmosvaloper
+	fmt.Println(uri)
 	responseData := HttpGet(uri)
 
-	validators, err := models.UnmarshalValidators(responseData)
+	validator, err := models.UnmarshalValidator(responseData)
 	if err != nil {
 		log.Fatal(err)
+		return models.Uptime{}, errors.New("Cosmosvaloper not found")
 	}
 
-	for _, v := range validators {
-		if v.OperatorAddress == cosmosvaloper {
-			return v.Uptime, nil
-		}
-	}
-
-	return models.Uptime{}, errors.New("Cosmosvaloper not found")
+	return validator.Uptime, nil
 }
 
 func GetBlockHeighAndTime(blockHeigh int) (int, time.Time) {
