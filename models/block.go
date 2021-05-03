@@ -82,3 +82,7 @@ type Signature struct {
 	Timestamp        string  `json:"timestamp"`
 	Signature        *string `json:"signature"`
 }
+
+type BlockTime struct {
+	Average float64 `json:"blocktime"`
+}
