@@ -1,48 +1,43 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"time"
 
 	"github.com/Colm3na/cosmos-opt-api/controller"
 	"github.com/Colm3na/cosmos-opt-api/logger"
+	"github.com/Colm3na/cosmos-opt-api/metrics"
 	"github.com/Colm3na/cosmos-opt-api/repository"
 	"github.com/Colm3na/cosmos-opt-api/service"
+	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-
-	. "github.com/Colm3na/cosmos-opt-api/constants"
-
-	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 func main() {
-	logger := logger.NewLogger()
-	logger.SetLoggingLevel(LOGGING_LEVEL)
-	repository := repository.NewRepository(logger)
-	service := service.NewService(repository, logger)
-	api := controller.NewController(service, logger)
-
-	b, err := tb.NewBot(tb.Settings{
-		Token:  "1707302307:AAHAGVGMFs28GW1_2m8ND938X_Yu3jMYUOE",
-		Poller: &tb.LongPoller{Timeout: 10 * time.Second},
-	})
-
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-
-	b.Handle("/hello", func(m *tb.Message) {
-		b.Send(m.Sender, "Hola jefe")
-	})
-
-	b.Start()
+	log := logger.NewLogger()
+	metrics := metrics.New()
+	repository := repository.NewRepository(log)
+	service := service.NewService(repository, log)
+	api := controller.NewController(service, metrics, log)
 
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.GET("/blocktime", api.GetBlocktime)
+	e.GET("/blocktime", api.GetBlocktimeApi)
 	e.GET("/validator/:id", api.GetValidatorUptime)
-	e.Logger.Fatal(e.Start(":47567"))
+	prommetheus := prometheus.NewPrometheus("cosmos-opt-api", nil)
+	prommetheus.Use(e)
+
+	go UpdateBlocktime(api)
+	e.Logger.Fatal(e.Start(":8080"))
+
+}
+
+func UpdateBlocktime(api *controller.Controller) {
+	for {
+		time.Sleep(5 * time.Second)
+		blocktime, _ := api.GetBlocktime()
+		fmt.Println("Blocktime:", blocktime.Average)
+	}
 }

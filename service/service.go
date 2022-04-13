@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Colm3na/cosmos-opt-api/constants"
 	"github.com/Colm3na/cosmos-opt-api/logger"
 	"github.com/Colm3na/cosmos-opt-api/models"
 	"github.com/Colm3na/cosmos-opt-api/repository"
@@ -18,80 +19,80 @@ type Service interface {
 
 type service struct {
 	repository repository.Repository
-	logger     *logger.Logger
+	log        logger.Logger
 }
 
-func NewService(repository repository.Repository, logger *logger.Logger) Service {
+func NewService(repository repository.Repository, log logger.Logger) Service {
 	return &service{
 		repository: repository,
-		logger:     logger,
+		log:        log,
 	}
 }
 
 func (s *service) GetValidatorUptime(cosmosvaloper string) (models.Uptime, error) {
-	s.logger.LogOnEntryWithContext(s.logger.GetContext(), cosmosvaloper)
+	s.log.EntryWithContext(s.log.FileContext(), cosmosvaloper)
 
 	uri := "https://api.cosmostation.io/v1/staking/validator/" + cosmosvaloper
 	responseData := s.repository.HttpGetBody(uri)
 
 	validator, err := models.UnmarshalValidator(responseData)
 	if err != nil {
-		s.logger.LogOnInternalErrorWithContext(s.logger.GetContext(), err)
+		s.log.InternalErrorWithContext(s.log.FileContext(), err)
 		return models.Uptime{}, err
 	}
 
-	s.logger.LogOnExitWithContext(s.logger.GetContext(), validator.Uptime)
+	s.log.ExitWithContext(s.log.FileContext(), validator.Uptime)
 	return validator.Uptime, nil
 }
 
 func (s *service) GetBlockHeighAndTime(blockHeigh int) (int, time.Time, error) {
-	s.logger.LogOnEntryWithContext(s.logger.GetContext(), blockHeigh)
+	s.log.EntryWithContext(s.log.FileContext(), blockHeigh)
 
-	uri := "http://cosmos.delega.io:26657/block"
-	if blockHeigh != -1 {
+	uri := "http://localhost:26657/block"
+	if blockHeigh != constants.LatestBlock {
 		uri = uri + "?height=" + strconv.Itoa(blockHeigh)
 	}
 	responseData := s.repository.HttpGetBody(uri)
 
 	block, err := models.UnmarshalBlock(responseData)
 	if err != nil {
-		s.logger.LogOnInternalErrorWithContext(s.logger.GetContext(), err)
+		s.log.InternalErrorWithContext(s.log.FileContext(), err)
 		return 0, time.Time{}, err
 	}
 
 	blockTime, err := time.Parse(time.RFC3339, block.Result.Block.Header.Time)
 	if err != nil {
-		s.logger.LogOnInternalErrorWithContext(s.logger.GetContext(), err)
+		s.log.InternalErrorWithContext(s.log.FileContext(), err)
 		return 0, time.Time{}, err
 	}
 
 	blockHeigh, err = strconv.Atoi(block.Result.Block.Header.Height)
 	if err != nil {
-		s.logger.LogOnInternalErrorWithContext(s.logger.GetContext(), err)
+		s.log.InternalErrorWithContext(s.log.FileContext(), err)
 		return 0, time.Time{}, err
 	}
 
-	s.logger.LogOnExitWithContext(s.logger.GetContext(), blockHeigh, blockTime)
+	s.log.ExitWithContext(s.log.FileContext(), blockHeigh, blockTime)
 	return blockHeigh, blockTime, nil
 }
 
 func (s *service) GetAverageBlockTime(latestBlockHeigh int, latestBlockTime time.Time) (float64, error) {
-	s.logger.LogOnEntryWithContext(s.logger.GetContext(), latestBlockHeigh, latestBlockTime)
+	s.log.EntryWithContext(s.log.FileContext(), latestBlockHeigh, latestBlockTime)
 
 	var blockTimeArray [20]time.Time
 	var blockPeriodArray [20]int64
 
-	uri := "http://cosmos.delega.io:26657/blockchain?minHeight=" + strconv.Itoa(latestBlockHeigh-21) + "&maxHeight=" + strconv.Itoa(latestBlockHeigh-1)
+	uri := "http://localhost:26657/blockchain?minHeight=" + strconv.Itoa(latestBlockHeigh-21) + "&maxHeight=" + strconv.Itoa(latestBlockHeigh-1)
 	responseData := s.repository.HttpGetBody(uri)
 	blockchain, err := models.UnmarshalBlockchain(responseData)
 	if err != nil {
-		s.logger.LogOnInternalErrorWithContext(s.logger.GetContext(), err)
+		s.log.InternalErrorWithContext(s.log.FileContext(), err)
 		return 0, err
 	}
 	for i := 0; i < 20; i++ {
 		blockTimeArray[i], err = time.Parse(time.RFC3339, blockchain.BlockchainResult.BlockMetas[i].Header.Time)
 		if err != nil {
-			s.logger.LogOnInternalErrorWithContext(s.logger.GetContext(), err)
+			s.log.InternalErrorWithContext(s.log.FileContext(), err)
 			return 0, err
 		}
 	}
@@ -102,9 +103,9 @@ func (s *service) GetAverageBlockTime(latestBlockHeigh int, latestBlockTime time
 		avg = avg + blockPeriodArray[i]
 	}
 	avgBlockTime := float64(avg) / (20 * 1000)
-	fmt.Printf("%v\n", blockPeriodArray)
-	fmt.Printf("Average block time = %fs\n", avgBlockTime)
+	s.log.InfoMessageWithContext(s.log.FileContext(), fmt.Sprintf("Block array: %v\n", blockPeriodArray))
+	s.log.InfoMessageWithContext(s.log.FileContext(), fmt.Sprintf("Average block time = %fs\n", avgBlockTime))
 
-	s.logger.LogOnExitWithContext(s.logger.GetContext(), avgBlockTime)
+	s.log.ExitWithContext(s.log.FileContext(), avgBlockTime)
 	return avgBlockTime, nil
 }

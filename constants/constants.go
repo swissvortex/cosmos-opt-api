@@ -1,3 +1,4 @@
 package constants
 
-const LOGGING_LEVEL string = "error"
+const DefaultLoggingLevel string = "info"
+const LatestBlock int = -1
