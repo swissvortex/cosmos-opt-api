@@ -2,7 +2,7 @@ package constants
 
 const ServerHost string = "localhost"
 const ServerPort string = "8080"
-const ProjectName string = "cosmos-opt-api"
+const ProjectName string = "cosmos"
 const DefaultLoggingLevel string = "info"
 const PrometheusUpdateTime int = 5
 const LatestBlock int = -1
