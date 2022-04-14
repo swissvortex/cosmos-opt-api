@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/Colm3na/cosmos-opt-api/controller"
-	"github.com/Colm3na/cosmos-opt-api/logger"
-	"github.com/Colm3na/cosmos-opt-api/metrics"
-	"github.com/Colm3na/cosmos-opt-api/repository"
-	"github.com/Colm3na/cosmos-opt-api/service"
+	"github.com/swissvortex/cosmos-opt-api/controller"
+	"github.com/swissvortex/cosmos-opt-api/logger"
+	"github.com/swissvortex/cosmos-opt-api/metrics"
+	"github.com/swissvortex/cosmos-opt-api/repository"
+	"github.com/swissvortex/cosmos-opt-api/service"
 )
 
 func main() {

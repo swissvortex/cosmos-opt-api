@@ -4,14 +4,14 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Colm3na/cosmos-opt-api/constants"
-	"github.com/Colm3na/cosmos-opt-api/logger"
-	"github.com/Colm3na/cosmos-opt-api/metrics"
-	"github.com/Colm3na/cosmos-opt-api/models"
-	"github.com/Colm3na/cosmos-opt-api/service"
 	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/swissvortex/cosmos-opt-api/constants"
+	"github.com/swissvortex/cosmos-opt-api/logger"
+	"github.com/swissvortex/cosmos-opt-api/metrics"
+	"github.com/swissvortex/cosmos-opt-api/models"
+	"github.com/swissvortex/cosmos-opt-api/service"
 )
 
 type Controller interface {

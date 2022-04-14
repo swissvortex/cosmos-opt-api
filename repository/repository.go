@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Colm3na/cosmos-opt-api/logger"
+	"github.com/swissvortex/cosmos-opt-api/logger"
 )
 
 type Repository interface {
