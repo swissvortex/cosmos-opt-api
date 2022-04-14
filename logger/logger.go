@@ -5,8 +5,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/Colm3na/cosmos-opt-api/constants"
 	"github.com/sirupsen/logrus"
+	"github.com/swissvortex/cosmos-opt-api/constants"
 )
 
 type Logger interface {
