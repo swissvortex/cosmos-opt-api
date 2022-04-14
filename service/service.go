@@ -33,7 +33,11 @@ func (s *service) GetValidatorUptime(cosmosvaloper string) (models.Uptime, error
 	s.log.EntryWithContext(s.log.FileContext(), cosmosvaloper)
 
 	uri := constants.CosmostationApi + cosmosvaloper
-	responseData := s.repository.HttpGetBody(uri)
+	responseData, err := s.repository.HttpGetBody(uri)
+	if err != nil {
+		s.log.InternalErrorWithContext(s.log.FileContext(), err)
+		return models.Uptime{}, err
+	}
 
 	validator, err := models.UnmarshalValidator(responseData)
 	if err != nil {
@@ -52,7 +56,11 @@ func (s *service) GetBlockHeighAndTime(blockHeigh int) (int, time.Time, error) {
 	if blockHeigh != constants.LatestBlock {
 		uri = uri + constants.BlockHeightParam + strconv.Itoa(blockHeigh)
 	}
-	responseData := s.repository.HttpGetBody(uri)
+	responseData, err := s.repository.HttpGetBody(uri)
+	if err != nil {
+		s.log.InternalErrorWithContext(s.log.FileContext(), err)
+		return 0, time.Time{}, err
+	}
 
 	block, err := models.UnmarshalBlock(responseData)
 	if err != nil {
@@ -83,7 +91,11 @@ func (s *service) GetAverageBlockTime(latestBlockHeigh int, latestBlockTime time
 	var blockPeriodArray [constants.AverageBlockWindow]int64
 
 	uri := constants.CosmosApiUrl + constants.BlockchainPath + constants.MinHeightParam + strconv.Itoa(latestBlockHeigh-constants.AverageBlockWindow-1) + constants.MaxHeightParam + strconv.Itoa(latestBlockHeigh-1)
-	responseData := s.repository.HttpGetBody(uri)
+	responseData, err := s.repository.HttpGetBody(uri)
+	if err != nil {
+		s.log.InternalErrorWithContext(s.log.FileContext(), err)
+		return 0, err
+	}
 	blockchain, err := models.UnmarshalBlockchain(responseData)
 	if err != nil {
 		s.log.InternalErrorWithContext(s.log.FileContext(), err)

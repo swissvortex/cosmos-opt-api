@@ -5,7 +5,7 @@ global:
 scrape_configs:
   - job_name: prometheus
     static_configs:
-      - targets: ['localhost:9090']
+      - targets: ['localhost:9999']
   - job_name: cosmos-opt-api 
     metrics_path: /metrics
     static_configs:
