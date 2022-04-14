@@ -13,12 +13,12 @@ type Repository interface {
 }
 
 type repository struct {
-	logger *logger.Logger
+	log logger.Logger
 }
 
-func NewRepository(logger *logger.Logger) Repository {
+func NewRepository(log logger.Logger) Repository {
 	return &repository{
-		logger: logger,
+		log: log,
 	}
 }
 
