@@ -26,7 +26,6 @@ type controller struct {
 }
 
 func NewController(service service.Service, metric metrics.Metric, log logger.Logger) Controller {
-	InitMetrics(metric)
 	return &controller{
 		service: service,
 		metric:  metric,
@@ -39,6 +38,7 @@ func (c *controller) Run() {
 	c.log.EntryWithContext(c.log.FileContext())
 	c.ConfigureMiddleware()
 	c.ConfigureEndpoints()
+	c.InitMetrics()
 	go c.UpdateBlocktime()
 	c.log.ErrorWithContext(c.log.FileContext(), c.Echo.Start(constants.ServerHost+":"+constants.ServerPort))
 }
@@ -58,13 +58,13 @@ func (c *controller) ConfigureEndpoints() {
 	health := c.Group("")
 	{
 		health.GET("/blocktime", c.GetBlocktimeApi)
-		health.GET("/validator/:id", c.GetValidatorUptime)
+		health.GET("/validator/:cosmosvaloper", c.GetValidatorUptime)
 	}
 }
 
-func InitMetrics(metric metrics.Metric) {
-	metric.NewGauge(constants.AverageBlocktimeGaugeName, constants.AverageBlocktimeGaugeHelp)
-	metric.NewGauge(constants.ValidatorUptimeGaugeName, constants.ValidatorUptimeGaugeHelp)
+func (c *controller) InitMetrics() {
+	c.metric.NewGauge(constants.AverageBlocktimeGaugeName, constants.AverageBlocktimeGaugeHelp)
+	c.metric.NewGauge(constants.ValidatorUptimeGaugeName, constants.ValidatorUptimeGaugeHelp)
 }
 
 func (c *controller) UpdateBlocktime() {
@@ -116,7 +116,7 @@ func (c *controller) GetBlocktimeApi(e echo.Context) error {
 func (c *controller) GetValidatorUptime(e echo.Context) error {
 	c.log.EntryWithContext(c.log.FileContext(), e)
 
-	cosmosvaloper := e.Param("id")
+	cosmosvaloper := e.Param("cosmosvaloper")
 	uptime, err := c.service.GetValidatorUptime(cosmosvaloper)
 	if err != nil {
 		c.log.ErrorWithContext(c.log.FileContext(), err)
