@@ -32,7 +32,7 @@ func NewService(repository repository.Repository, log logger.Logger) Service {
 func (s *service) GetValidatorUptime(cosmosvaloper string) (models.Uptime, error) {
 	s.log.EntryWithContext(s.log.FileContext(), cosmosvaloper)
 
-	uri := "https://api.cosmostation.io/v1/staking/validator/" + cosmosvaloper
+	uri := constants.CosmostationApi + cosmosvaloper
 	responseData := s.repository.HttpGetBody(uri)
 
 	validator, err := models.UnmarshalValidator(responseData)
@@ -48,9 +48,9 @@ func (s *service) GetValidatorUptime(cosmosvaloper string) (models.Uptime, error
 func (s *service) GetBlockHeighAndTime(blockHeigh int) (int, time.Time, error) {
 	s.log.EntryWithContext(s.log.FileContext(), blockHeigh)
 
-	uri := "http://localhost:26657/block"
+	uri := constants.CosmosApiUrl + constants.BlockPath
 	if blockHeigh != constants.LatestBlock {
-		uri = uri + "?height=" + strconv.Itoa(blockHeigh)
+		uri = uri + constants.BlockHeightParam + strconv.Itoa(blockHeigh)
 	}
 	responseData := s.repository.HttpGetBody(uri)
 
@@ -79,17 +79,17 @@ func (s *service) GetBlockHeighAndTime(blockHeigh int) (int, time.Time, error) {
 func (s *service) GetAverageBlockTime(latestBlockHeigh int, latestBlockTime time.Time) (float64, error) {
 	s.log.EntryWithContext(s.log.FileContext(), latestBlockHeigh, latestBlockTime)
 
-	var blockTimeArray [20]time.Time
-	var blockPeriodArray [20]int64
+	var blockTimeArray [constants.AverageBlockWindow]time.Time
+	var blockPeriodArray [constants.AverageBlockWindow]int64
 
-	uri := "http://localhost:26657/blockchain?minHeight=" + strconv.Itoa(latestBlockHeigh-21) + "&maxHeight=" + strconv.Itoa(latestBlockHeigh-1)
+	uri := constants.CosmosApiUrl + constants.BlockchainPath + constants.MinHeightParam + strconv.Itoa(latestBlockHeigh-constants.AverageBlockWindow-1) + constants.MaxHeightParam + strconv.Itoa(latestBlockHeigh-1)
 	responseData := s.repository.HttpGetBody(uri)
 	blockchain, err := models.UnmarshalBlockchain(responseData)
 	if err != nil {
 		s.log.InternalErrorWithContext(s.log.FileContext(), err)
 		return 0, err
 	}
-	for i := 0; i < 20; i++ {
+	for i := 0; i < constants.AverageBlockWindow; i++ {
 		blockTimeArray[i], err = time.Parse(time.RFC3339, blockchain.BlockchainResult.BlockMetas[i].Header.Time)
 		if err != nil {
 			s.log.InternalErrorWithContext(s.log.FileContext(), err)
@@ -98,13 +98,13 @@ func (s *service) GetAverageBlockTime(latestBlockHeigh int, latestBlockTime time
 	}
 	blockPeriodArray[0] = int64(latestBlockTime.Sub(blockTimeArray[0]) / time.Millisecond)
 	avg := blockPeriodArray[0]
-	for i := 1; i < 20; i++ {
+	for i := 1; i < constants.AverageBlockWindow; i++ {
 		blockPeriodArray[i] = int64(blockTimeArray[i-1].Sub(blockTimeArray[i]) / time.Millisecond)
 		avg = avg + blockPeriodArray[i]
 	}
-	avgBlockTime := float64(avg) / (20 * 1000)
-	s.log.InfoMessageWithContext(s.log.FileContext(), fmt.Sprintf("Block array: %v\n", blockPeriodArray))
-	s.log.InfoMessageWithContext(s.log.FileContext(), fmt.Sprintf("Average block time = %fs\n", avgBlockTime))
+	avgBlockTime := float64(avg) / float64(constants.AverageBlockWindow*1000)
+	s.log.DebugWithContext(s.log.FileContext(), fmt.Sprintf("Block array: %v\n", blockPeriodArray))
+	s.log.DebugWithContext(s.log.FileContext(), fmt.Sprintf("Average block time = %fs\n", avgBlockTime))
 
 	s.log.ExitWithContext(s.log.FileContext(), avgBlockTime)
 	return avgBlockTime, nil
