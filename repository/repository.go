@@ -2,7 +2,6 @@ package repository
 
 import (
 	"io/ioutil"
-	"log"
 	"net/http"
 
 	"github.com/swissvortex/cosmos-opt-api/logger"
@@ -25,12 +24,12 @@ func NewRepository(log logger.Logger) Repository {
 func (r *repository) HttpGetBody(uri string) []byte {
 	response, err := http.Get(uri)
 	if err != nil {
-		log.Fatal(err)
+		r.log.ErrorWithContext(r.log.FileContext(), err)
 	}
 
 	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		log.Fatal(err)
+		r.log.ErrorWithContext(r.log.FileContext(), err)
 	}
 	return responseData
 }
