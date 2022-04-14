@@ -15,12 +15,12 @@ services:
     # ports:
     #   - 9090:9090
     restart: always
-  grafana:
-    container_name: grafana
-    image: grafana/grafana:8.4.5
-    network_mode: "host"
-    volumes:
-      - grafana-storage:/var/lib/grafana
+  # grafana:
+  #   container_name: grafana
+  #   image: grafana/grafana:8.4.5
+  #   network_mode: "host"
+  #   volumes:
+  #     - grafana-storage:/var/lib/grafana
     # ports:
     #   - 3000:3000
     # links:
@@ -28,4 +28,4 @@ services:
 
 volumes:
   prometheus_data:
-  grafana-storage:
+  # grafana-storage:
