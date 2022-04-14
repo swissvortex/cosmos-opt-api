@@ -1,0 +1,29 @@
+version: '3.1'
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.34.0
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - 8888:8888
+    restart: always
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:8.4.5
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    ports:
+      - 3000:3000
+    links:
+      - "prometheus:prometheus"
+
+volumes:
+  prometheus_data:
+  grafana-storage:
