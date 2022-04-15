@@ -45,11 +45,6 @@ func (c *controller) Run() {
 
 func (c *controller) ConfigureMiddleware() {
 	c.log.EntryWithContext(c.log.FileContext())
-
-	c.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{constants.ServerHost},
-		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
-	}))
 	c.Use(middleware.Logger())
 	c.Use(middleware.Recover())
 	prommetheus := prometheus.NewPrometheus(constants.ProjectName, nil)

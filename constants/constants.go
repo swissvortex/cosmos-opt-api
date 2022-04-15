@@ -1,6 +1,6 @@
 package constants
 
-const ServerHost string = "localhost"
+const ServerHost string = ""
 const ServerPort string = "8080"
 const ProjectName string = "cosmos"
 const DefaultLoggingLevel string = "info"
