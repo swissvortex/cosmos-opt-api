@@ -1,2 +1,2 @@
 # cosmos-opt-api
-Enhance API endpoints for Cosmos
+Enhance prometheus metrics using the Cosmos API endpoints
